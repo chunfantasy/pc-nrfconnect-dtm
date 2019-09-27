@@ -38,6 +38,7 @@ import './resources/css/index.scss';
 
 import path from 'path';
 
+import electron from 'electron';
 import {
     getAppDir,
     logger,
@@ -45,6 +46,7 @@ import {
     stopWatchingDevices,
 } from 'nrfconnect/core';
 import React from 'react';
+import Button from 'react-bootstrap/Button';
 
 import { deselectDevice, selectDevice } from './lib/actions/testActions';
 import { clearAllWarnings, clearIncompatibleWarning, setIncompatibleWarning } from './lib/actions/warningActions';
@@ -87,6 +89,29 @@ export default {
         </SidePanel>
     ),
 
+    decorateNavMenu: () => () => (
+        <div className="nav-menu-wrap">
+            <Button
+                className="core-btn"
+                variant="primary"
+                onClick={() => {
+                    const displayName = electron.remote.getCurrentWindow().getTitle().split('-').pop();
+                    const appPath = window.location.search.split('=').pop();
+                    electron.ipcRenderer.send(
+                        'open-app',
+                        {
+                            displayName,
+                            path: appPath,
+                            iconPath: path.join(appPath, '/resources/icon.png'),
+                        },
+                    );
+                }}
+            >
+                Select another device
+            </Button>
+        </div>
+    ),
+
     mapDeviceSelectorState: (state, props) => ({
         portIndicatorStatus: (state.app.device.serialNumber !== null) ? 'on' : 'off',
         ...props,
@@ -119,11 +144,12 @@ export default {
                 break;
             }
 
-            case 'DEVICE_DESELECTED':
+            case 'DEVICE_DESELECTED': {
                 dispatch(deselectDevice());
                 dispatch(startWatchingDevices());
                 dispatch(clearAllWarnings());
                 break;
+            }
 
             default:
         }

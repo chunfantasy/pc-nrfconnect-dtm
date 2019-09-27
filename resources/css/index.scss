@@ -142,3 +142,14 @@
         font-weight: bold;
     }
 }
+
+.nav-menu-wrap {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    color: white;
+    font-size: large;
+    button {
+        margin-right: 10px;
+    }
+}
